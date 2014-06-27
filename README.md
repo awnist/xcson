@@ -6,6 +6,8 @@ csonmason is a node module that extends the [CSON](https://github.com/bevry/cson
 
 Let's say you need to create a huge ugly JSON schema:
 
+**schema.json**
+
     {
         "title": "Example Schema",
         "type": "object",
@@ -31,6 +33,7 @@ In the csonmason world, you would create a mixin file:
     }
 
 And rewrite the previous as follows:
+
 **schema.cson**
 
     {
@@ -49,21 +52,24 @@ Now we build everything:
 
 Output will be equivalent to the first example.
 
-## Available plugins and mixins
+## Available plugins
 
-These are the available plugins and mixins out of the box:
+These are the available plugins out of the box:
 
 **inherits**
+
 Merges the contents of each mixin specified, and can have a custom object as the last parameter:
 
     key: inherits "foo", "bar", { object }
 
 **repeat**
+
 Creates an array of content repeated n times.
 
     key: repeat 4, { object }
 
 **multikey**
+
 Finds all comma delimited key names and expands them.
 
     "foo, bar, baz": { object }
@@ -87,7 +93,7 @@ Nested plugins/mixins are valid:
     baz:
         "boo, woo": inherits "bar", thing: repeat 2, { maybe: true }
 
-which would produce this:
+would produce this:
 
     baz:
         boo: { bar: true, thing: [{ maybe: true }, { maybe: true }] }
