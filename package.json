@@ -1,0 +1,24 @@
+{
+  "name": "csonmason",
+  "description": "Build cson/json dynamically with mixins/plugins",
+  "author": "Awnist <hi@awnist.com> (http://awnist.com)",
+  "version": "0.0.1",
+  "main": "./lib/csonmason",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:awnist/csonmason.git"
+  },
+  "license": {
+    "type": "Public Domain",
+    "url": "http://unlicense.org/"
+  },
+  "dependencies": {
+    "coffee-script": "~1.7.1",
+    "traverse": "~0.6.6",
+    "lodash": "~2.4.1",
+    "json-stable-stringify": "~1.0.0"
+  },
+  "scripts": {
+    "prepublish": "coffee -o lib/ -c src/"
+  }
+}
