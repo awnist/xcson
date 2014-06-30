@@ -12,6 +12,7 @@
     "type": "Public Domain",
     "url": "http://unlicense.org/"
   },
+  "keywords": ["cson", "json", "mixin", "schema"],
   "dependencies": {
     "coffee-script": "~1.7.1",
     "traverse": "~0.6.6",

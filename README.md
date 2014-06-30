@@ -1,6 +1,6 @@
 ## What is "csonmason"?
 
-csonmason is a node module that extends the [CSON](https://github.com/bevry/cson) data format to include mixins and plugins. You write in an extensible CSON format, you get JSON back. It's the DRYest way to build large JSON datasets with lots of repeating content.
+Csonmason is a node module that extends the [CSON](https://github.com/bevry/cson) data format to include mixins and plugins. You write in an extensible CSON format, you get JSON back. It's the DRYest way to build large JSON datasets with lots of repeating content.
 
 ## Example
 
@@ -47,7 +47,6 @@ Now we build everything:
 
     var csonmason = require('csonmason');
     output = new csonmason('schema.cson');
-    console.log(output.toObject());
     console.log(output.toString());
 
 Output will be equivalent to the first example.
@@ -84,20 +83,64 @@ Make sure to enclose in quotes.
 
 ## Notes
 
-CSON is just Coffeescript. Csonmason files are valid Coffeescript.
+Csonmason is valid CSON. CSON is just Coffeescript. Csonmason files are valid Coffeescript.
+
 
 output.toString() will, by default, sort all keynames.
 
-Nested plugins/mixins are valid:
+
+You can omit the leading and trailing document brackets for extra clarity:
+
+**example.cson**
+
+    { # Omit me
+        foo:
+            bar:
+                baz: true
+    } # Omit me
+
+
+Infinitely nested plugins/mixins are valid:
 
     baz:
-        "boo, woo": inherits "bar", thing: repeat 2, { maybe: true }
+            "boo, woo": inherits "bar", thing: repeat 2, maybe: true
 
-would produce this:
+but will become difficult to read as a side effect of Coffee's expressive nature. To help readability, you can use parenthesis, brackets and whitespace:
 
     baz:
-        boo: { bar: true, thing: [{ maybe: true }, { maybe: true }] }
-        woo: { bar: true, thing: [{ maybe: true }, { maybe: true }] }
+        "boo, woo": inherits "bar",
+            thing: repeat(2, { maybe: true })
+
+and don't forget to separate repeatable content blocks into mixins.
+
+For reference, the JSON produced from either examples above would look like this:
+
+    {
+      "baz": {
+        "boo": {
+          "bar": true,
+          "thing": [
+            {
+              "maybe": true
+            },
+            {
+              "maybe": true
+            }
+          ]
+        },
+        "woo": {
+          "bar": true,
+          "thing": [
+            {
+              "maybe": true
+            },
+            {
+              "maybe": true
+            }
+          ]
+        }
+      }
+    }
 
 ## Installation
 

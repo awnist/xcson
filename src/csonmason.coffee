@@ -39,6 +39,9 @@ module.exports = CsonMason = class CsonMason
 			@config = config
 
 		@jsons = {}
+
+		@config.stringify = '  '
+
 		@config.plugins ?= Object.keys pluginregistry
 
 		contents = fs.readFileSync(@config.file).toString()
@@ -59,7 +62,7 @@ module.exports = CsonMason = class CsonMason
 			return
 
 	toObject: -> @result
-	toString: -> stringify @result
+	toString: -> stringify @result, space: @config.stringify
 
 	import: (name) ->
 		return @json(name) if @json(name)
@@ -91,7 +94,7 @@ CsonMason.plugin 'multikey', 'postprocess', (x) ->
 
 		@delete()
 
-CsonMason.plugin 'repeat', 'template', (times, content) -> content for n in [1..times]
+CsonMason.plugin 'repeat', 'template', (times, content) -> _.cloneDeep(content) for n in [1..times]
 
 CsonMason.plugin 'inherits', 'template', (extenders...) ->
 	obj = {}
