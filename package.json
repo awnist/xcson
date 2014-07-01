@@ -2,7 +2,7 @@
   "name": "csonmason",
   "description": "Build cson/json dynamically with mixins/plugins",
   "author": "Awnist <hi@awnist.com> (http://awnist.com)",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "main": "./lib/csonmason",
   "repository": {
     "type": "git",

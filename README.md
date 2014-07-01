@@ -89,7 +89,7 @@ Csonmason is valid CSON. CSON is just Coffeescript. Csonmason files are valid Co
 output.toString() will, by default, sort all keynames.
 
 
-You can omit the leading and trailing document brackets for extra clarity:
+You can omit the leading and trailing document brackets for extra cleanliness:
 
 **example.cson**
 

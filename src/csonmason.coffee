@@ -40,7 +40,7 @@ module.exports = CsonMason = class CsonMason
 
 		@jsons = {}
 
-		@config.stringify = '  '
+		@config.stringifySpaces = '  '
 
 		@config.plugins ?= Object.keys pluginregistry
 
@@ -62,7 +62,7 @@ module.exports = CsonMason = class CsonMason
 			return
 
 	toObject: -> @result
-	toString: -> stringify @result, space: @config.stringify
+	toString: -> stringify @result, space: @config.stringifySpaces
 
 	import: (name) ->
 		return @json(name) if @json(name)
