@@ -1,6 +1,8 @@
-## What is "csonmason"?
+## What is "xcson"?
 
-Csonmason is a node module that extends the [CSON](https://github.com/bevry/cson) data format to include mixins and plugins. You write in an extensible CSON format, you get JSON back. It's the DRYest way to build large JSON datasets with lots of repeating content.
+xcson is eXtensible CSON, a node module that extends the [CSON](https://github.com/bevry/cson) data format to include mixins and plugins.
+
+You write in an extensible CSON format, you get JSON back. It's the DRYest way to build large JSON datasets with lots of repeating content.
 
 ## Example
 
@@ -24,7 +26,7 @@ Let's say you need to create a huge ugly JSON schema:
         ...
     }
 
-In the csonmason world, you would create a mixin file:
+In the xcson world, you would create a mixin file:
 
 **type/string.cson**
 
@@ -45,8 +47,8 @@ And rewrite the previous as follows:
 
 Now we build everything:
 
-    var csonmason = require('csonmason');
-    output = new csonmason('schema.cson');
+    var xcson = require('xcson');
+    output = new xcson('schema.cson');
     console.log(output.toString());
 
 Output will be equivalent to the first example.
@@ -83,15 +85,13 @@ Make sure to enclose in quotes.
 
 ## Notes
 
-Csonmason is valid CSON. CSON is just Coffeescript. Csonmason files are valid Coffeescript.
+xcson is valid CSON. CSON is just Coffeescript. xcson files are valid Coffeescript.
 
 
 output.toString() will, by default, sort all keynames.
 
 
 You can omit the leading and trailing document brackets for extra cleanliness:
-
-**example.cson**
 
     { # Omit me
         foo:
@@ -102,10 +102,10 @@ You can omit the leading and trailing document brackets for extra cleanliness:
 
 Infinitely nested plugins/mixins are valid:
 
-    baz:
-            "boo, woo": inherits "bar", thing: repeat 2, maybe: true
+    baz: "boo, woo": inherits "bar", thing: repeat 2, maybe: true
 
-but will become difficult to read as a side effect of Coffee's expressive nature. To help readability, you can use parenthesis, brackets and whitespace:
+but will become difficult to read as a side effect of Coffee's expressive nature.
+To help readability, you can use parenthesis, brackets and whitespace:
 
     baz:
         "boo, woo": inherits "bar",
@@ -146,6 +146,6 @@ For reference, the JSON produced from either examples above would look like this
 
 via npm:
 
-    $ npm install csonmason
+    $ npm install xcson
 
-csonmason is [UNLICENSED](http://unlicense.org/).
+xcson is [UNLICENSED](http://unlicense.org/).

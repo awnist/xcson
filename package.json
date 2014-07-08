@@ -1,12 +1,12 @@
 {
-  "name": "csonmason",
-  "description": "Build cson/json dynamically with mixins/plugins",
+  "name": "xcson",
+  "description": "Extensible CSON - build cson/json dynamically with mixins/plugins",
   "author": "Awnist <hi@awnist.com> (http://awnist.com)",
   "version": "0.0.3",
-  "main": "./lib/csonmason",
+  "main": "./lib/xcson",
   "repository": {
     "type": "git",
-    "url": "git@github.com:awnist/csonmason.git"
+    "url": "git@github.com:awnist/xcson.git"
   },
   "license": {
     "type": "Public Domain",
