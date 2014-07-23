@@ -111,7 +111,7 @@ Infinitely nested plugins/mixins are valid:
     baz: "boo, woo": inherits "bar", thing: repeat 2, maybe: true
 
 but will become difficult to read as a side effect of Coffee's expressive nature.
-To help readability, you can use parenthesis, brackets and whitespace:
+To help readability, you should use parenthesis, brackets and whitespace:
 
     baz:
         "boo, woo": inherits "bar",

@@ -20,7 +20,7 @@ findFile = (paths, lookingfor) ->
 
 		files = glob.sync check, { nonegate: true }
 
-		console.log "glob", check, " = ", files
+		# console.log "glob", check, " = ", files
 
 		return files if files.length
 
@@ -48,9 +48,13 @@ module.exports = Xcson = class Xcson
 
 		@config.plugins ?= Object.keys pluginregistry
 
-		console.log @config.file
+		# console.log @config.file
 
-		contents = fs.readFileSync(@config.file).toString()
+		files = glob.sync @config.file, { nonegate: true }
+
+		throw "No files found for \"#{@config.file}\"" unless files.length
+
+		contents = (fs.readFileSync(file).toString() for file in files).join "\n"
 
 		context = {}
 
@@ -76,7 +80,7 @@ module.exports = Xcson = class Xcson
 		# console.log path.dirname(@config.file), name
 
 		if found = findFile path.dirname(@config.file), name
-			console.log "found:", found
+			# console.log "found:", found
 
 			parsed = (new Xcson(file).toObject() for file in found)
 
