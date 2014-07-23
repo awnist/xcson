@@ -63,6 +63,12 @@ Merges the contents of each mixin specified, and can have a custom object as the
 
     key: inherits "foo", "bar", { object }
 
+**enumerate**
+
+Creates an array from a glob or list of mixins.
+
+    key: enumerate "files/*", "anotherfile"
+
 **repeat**
 
 Creates an array of content repeated n times.

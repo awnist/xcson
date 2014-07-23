@@ -2,7 +2,7 @@
   "name": "xcson",
   "description": "Extensible CSON - build cson/json dynamically with mixins/plugins",
   "author": "Awnist <hi@awnist.com> (http://awnist.com)",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "./lib/xcson",
   "repository": {
     "type": "git",
@@ -12,12 +12,18 @@
     "type": "Public Domain",
     "url": "http://unlicense.org/"
   },
-  "keywords": ["cson", "json", "mixin", "schema"],
+  "keywords": [
+    "cson",
+    "json",
+    "mixin",
+    "schema"
+  ],
   "dependencies": {
     "coffee-script": "~1.7.1",
     "traverse": "~0.6.6",
     "lodash": "~2.4.1",
-    "json-stable-stringify": "~1.0.0"
+    "json-stable-stringify": "~1.0.0",
+    "glob": "~4.0.4"
   },
   "scripts": {
     "prepublish": "coffee -o lib/ -c src/"
