@@ -2,7 +2,7 @@
   "name": "xcson",
   "description": "Extensible CSON - build cson/json dynamically with mixins/plugins",
   "author": "Awnist <hi@awnist.com> (http://awnist.com)",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "./lib/xcson",
   "repository": {
     "type": "git",

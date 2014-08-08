@@ -5,41 +5,42 @@ fs = require 'fs'
 glob = require 'glob'
 path = require 'path'
 {Promise} = require 'es6-promise'
-# PromiseQueue = require './PromiseQueue'
 stringify = require 'json-stable-stringify'
-# traverse = require 'traverse'
 traverseasync = require 'traverse-async'
 
 isPromise = (object) -> isObject(object) && typeof object.then is "function"
 isObject = (obj) -> '[object Object]' == Object::toString.call(obj)
+promisifyArray = (results) -> (Promise.resolve(r) for r in results)
 
 class BlockNodeExit
 	constructor: -> @waitTimer = null
 	start: -> @waitTimer = setTimeout (=> @start()), 1000
 	stop: -> clearTimeout @waitTimer
-exitblocker = new BlockNodeExit
 
+# TODO: async glob
 findFile = (paths, lookingfor) ->
 
-	lookingfor = "#{lookingfor}.{xcson,cson,json}" unless path.extname lookingfor
+	new Promise (resolve, reject) ->
 
-	# if lookingfor is in a subfolder, extract folder path
-	paths = path.dirname(lookingfor) unless paths
+		lookingfor = "#{lookingfor}.{xcson,cson,json}" unless path.extname lookingfor
 
-	# arrayify
-	paths = paths.split(path.sep) if typeof paths is 'string'
+		# if lookingfor is in a subfolder, extract folder path
+		paths = path.dirname(lookingfor) unless paths
 
-	while paths.length
+		# arrayify
+		paths = paths.split(path.sep) if typeof paths is 'string'
 
-		check = path.join.apply @, paths.concat([lookingfor])
+		while paths.length
 
-		files = glob.sync check, { nonegate: true }
+			check = path.join.apply @, paths.concat([lookingfor])
 
-		return files if files.length
+			files = glob.sync check, { nonegate: true }
 
-		paths.pop()
+			return resolve(files) if files.length
 
-	return false
+			paths.pop()
+
+		reject "Can't find #{lookingfor}"
 
 
 module.exports = Xcson = class Xcson
@@ -48,6 +49,8 @@ module.exports = Xcson = class Xcson
 	@scope = {}
 
 	constructor: (config, finalcallback) ->
+
+		@exitblocker = new BlockNodeExit(config)
 
 		if typeof config is 'string'
 			# If this is an unparsed object in string form...
@@ -89,16 +92,16 @@ module.exports = Xcson = class Xcson
 		# https://github.com/bevry/cson/blob/master/README.md#use-case
 		result = coffee.eval parse_me, sandbox: context
 
-		exitblocker.start()
+		@exitblocker.start()
 
 		promise = traverse.call @, result
 
-		promise.then (success) ->
+		promise.then (success) =>
 			finalcallback(null, success) if finalcallback
-			exitblocker.stop()
-		, (err) ->
+			@exitblocker.stop()
+		, (err) =>
 			finalcallback(err, null) if finalcallback
-			exitblocker.stop()
+			@exitblocker.stop()
 
 		return promise
 
@@ -161,7 +164,6 @@ module.exports = Xcson = class Xcson
 							return reject(err) if err
 							next()
 
-					# console.log "was promise"
 					# next()
 				else
 					async.applyEach walkerfns, this, (err, results) ->
@@ -178,13 +180,17 @@ module.exports = Xcson = class Xcson
 	toString: -> stringify @result, space: @config.stringifySpaces
 
 	import: (name) ->
-		return @cache(name) if @cache(name)
 
-		if found = findFile path.dirname(@config.file), name
-			parsed = (new Xcson(file).toObject() for file in found)
-			return @cache name, parsed
-		else
-			throw new Error "Xcson: can't find inheritable \"#{name}\""
+		if @cache name
+			return Promise.resolve @cache name
+
+		new Promise (resolve, reject) =>
+			findFile(path.dirname(@config.file), name)
+			.then (files) ->
+				Promise.all((new Xcson(file) for file in files))
+				.then (res) -> resolve _.merge.apply @, res
+			, reject
+
 
 	cache: (name, json) ->
 		@caches[name] = json if json
@@ -218,26 +224,15 @@ Xcson.walker 'multikey', (obj, next) ->
 Xcson.scope.repeat = (times, content) -> _.cloneDeep(content) for n in [1..times]
 
 Xcson.scope.enumerate = (enumerators...) ->
-	arr = []
+	importOrObjects = (for e in enumerators
+		if typeof e is "string" then @import.call(@, e) else e)
 
-	for e in enumerators
-
-		if typeof e is "string"
-			e = @import.call(@, e)
-
-		arr.push e...
-
-	arr
+	Promise.all promisifyArray importOrObjects
 
 Xcson.scope.inherits = (extenders...) ->
-	obj = {}
+	importOrObjects = (for e in extenders
+		if typeof e is "string" then @import.call(@, e) else e)
 
-	for e in extenders
-
-		if typeof e is "string"
-			e = _.merge.apply @, @import.call(@, e)
-
-		for key, val of e
-			obj[key] = val
-
-	obj
+	new Promise (resolve, reject) ->
+		Promise.all promisifyArray importOrObjects
+		.then ((res) -> resolve _.merge.apply @, res), reject
