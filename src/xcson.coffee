@@ -50,11 +50,9 @@ module.exports = Xcson = class Xcson
 
 	constructor: (config, finalcallback) ->
 
-		@exitblocker = new BlockNodeExit(config)
-
 		if typeof config is 'string'
 			# If this is an unparsed object in string form...
-			if config.indexOf('{') + config.indexOf(':') > -2
+			if config.indexOf("\n") + config.indexOf(':') > -2
 				parse_me = config
 				@config = {}
 			# Otherwise assume file.
@@ -75,11 +73,32 @@ module.exports = Xcson = class Xcson
 		# @config.plugins ?= Object.keys extensions
 
 		if @config.file
-			files = glob.sync @config.file, { nonegate: true }
-			throw "No files found for \"#{@config.file}\"" unless files.length
-			parse_me = (fs.readFileSync(file).toString() for file in files).join "\n"
 
-		return @parse parse_me, finalcallback
+			files = glob.sync @config.file, { nonegate: true }
+
+			throw "No files found for \"#{@config.file}\"" unless files.length
+
+			if files.length > 1
+				promise = Promise.all(new Xcson(file) for file in files)
+			else
+				@file = files[0]
+				promise = @parse fs.readFileSync(files[0]).toString()
+
+		else
+			promise = @parse(parse_me)
+
+		@exitblocker = new BlockNodeExit
+		@exitblocker.start()
+
+		promise.then (result) =>
+			finalcallback(null, result) if finalcallback
+			@exitblocker.stop()
+		, (err) ->
+			finalcallback(err, null) if finalcallback
+			@exitblocker.stop()
+
+		return promise
+
 
 	parse: (parse_me, finalcallback) ->
 
@@ -87,23 +106,12 @@ module.exports = Xcson = class Xcson
 
 		context = {}
 		for key, fn of @scope
-			context[key] = fn.bind @
+			context[key] = if typeof fn is 'function' then fn.bind(@) else fn
 
 		# https://github.com/bevry/cson/blob/master/README.md#use-case
 		result = coffee.eval parse_me, sandbox: context
 
-		@exitblocker.start()
-
-		promise = traverse.call @, result
-
-		promise.then (success) =>
-			finalcallback(null, success) if finalcallback
-			@exitblocker.stop()
-		, (err) =>
-			finalcallback(err, null) if finalcallback
-			@exitblocker.stop()
-
-		return promise
+		traverse.call @, result
 
 	traverse = (obj) ->
 
@@ -112,6 +120,8 @@ module.exports = Xcson = class Xcson
 		doneWalking = false
 
 		walkers = @extsOfType('walker')
+
+		self = @
 
 		new Promise (resolve, reject) ->
 
@@ -152,6 +162,9 @@ module.exports = Xcson = class Xcson
 				, reject
 
 			traverseasync.traverse obj, (value, next) ->
+
+				@xcson = self
+
 				if isPromise @node
 
 					# console.log "while traversing, found a promise", @path?.join(".")
@@ -181,8 +194,8 @@ module.exports = Xcson = class Xcson
 
 	import: (name) ->
 
-		if @cache name
-			return Promise.resolve @cache name
+		# if @cache name
+		# 	return Promise.resolve @cache name
 
 		new Promise (resolve, reject) =>
 			findFile(path.dirname(@config.file), name)
@@ -191,10 +204,9 @@ module.exports = Xcson = class Xcson
 				.then (res) -> resolve _.merge.apply @, res
 			, reject
 
-
-	cache: (name, json) ->
-		@caches[name] = json if json
-		@caches?[name]
+	# cache: (name, json) ->
+	# 	@caches[name] = json if json
+	# 	@caches?[name]
 
 	extsOfType: (type) -> (key for key in @config.extensions when extensions[key].type is type)
 
