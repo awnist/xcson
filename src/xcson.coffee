@@ -111,9 +111,9 @@ module.exports = Xcson = class Xcson
 		# https://github.com/bevry/cson/blob/master/README.md#use-case
 		result = coffee.eval parse_me, sandbox: context
 
-		traverse.call @, result
+		@traverse.call @, result
 
-	traverse = (obj) ->
+	traverse: (obj) ->
 
 		promises = {}
 
@@ -129,9 +129,7 @@ module.exports = Xcson = class Xcson
 				(context, next) ->
 					result = fn.apply context, arguments
 					if isPromise result
-
 						# console.log "walkerfn promise", context.path?.join(".")
-
 						result.then (-> next()), reject
 						watchPromise.call(context, result)
 
@@ -245,6 +243,5 @@ Xcson.scope.inherits = (extenders...) ->
 	importOrObjects = (for e in extenders
 		if typeof e is "string" then @import.call(@, e) else e)
 
-	new Promise (resolve, reject) ->
-		Promise.all promisifyArray importOrObjects
-		.then ((res) -> resolve _.merge.apply @, res), reject
+	Promise.all(promisifyArray importOrObjects)
+	.then (res) => @traverse(_.merge.apply @, res)
