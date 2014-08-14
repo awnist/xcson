@@ -190,7 +190,7 @@ module.exports = Xcson = class Xcson
 	toObject: -> @result
 	toString: -> stringify @result, space: @config.stringifySpaces
 
-	import: (name) ->
+	import: (name, merge=false) ->
 
 		# if @cache name
 		# 	return Promise.resolve @cache name
@@ -199,7 +199,7 @@ module.exports = Xcson = class Xcson
 			findFile(path.dirname(@config.file), name)
 			.then (files) ->
 				Promise.all((new Xcson(file) for file in files))
-				.then (res) -> resolve _.merge.apply @, res
+				.then (res) -> resolve if merge then _.merge.apply(@, res) else res
 			, reject
 
 	# cache: (name, json) ->
@@ -237,7 +237,11 @@ Xcson.scope.enumerate = (enumerators...) ->
 	importOrObjects = (for e in enumerators
 		if typeof e is "string" then @import.call(@, e) else e)
 
-	Promise.all promisifyArray importOrObjects
+	new Promise (resolve, reject) ->
+		Promise.all promisifyArray importOrObjects
+		.then (res) ->
+			resolve [].concat res...
+		, reject
 
 Xcson.scope.inherits = (extenders...) ->
 	importOrObjects = (for e in extenders
