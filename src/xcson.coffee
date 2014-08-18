@@ -7,6 +7,7 @@ path = require 'path'
 {Promise} = require 'es6-promise'
 stringify = require 'json-stable-stringify'
 traverseasync = require 'traverse-async'
+# contextify = require 'contextify'
 
 isPromise = (object) -> isObject(object) && typeof object.then is "function"
 isObject = (obj) -> '[object Object]' == Object::toString.call(obj)
@@ -93,7 +94,7 @@ module.exports = Xcson = class Xcson
 		promise.then (result) =>
 			finalcallback(null, result) if finalcallback
 			@exitblocker.stop()
-		, (err) ->
+		, (err) =>
 			finalcallback(err, null) if finalcallback
 			@exitblocker.stop()
 
