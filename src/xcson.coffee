@@ -31,6 +31,9 @@ findFile = (paths, lookingfor) ->
 		# arrayify
 		paths = paths.split(path.sep) if typeof paths is 'string'
 
+		# Because /foo/bar becomes ['', 'foo', 'bar'] from the split above
+		paths[0] = path.sep unless paths[0]
+
 		while paths.length
 
 			check = path.join.apply @, paths.concat([lookingfor])
