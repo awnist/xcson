@@ -7,6 +7,7 @@ path = require 'path'
 {Promise} = require 'es6-promise'
 stringify = require 'json-stable-stringify'
 traverseasync = require 'traverse-async'
+rootfinder = require 'root-finder'
 # contextify = require 'contextify'
 
 isPromise = (object) -> isObject(object) && typeof object.then is "function"
@@ -21,18 +22,20 @@ class BlockNodeExit
 # TODO: async glob
 findFile = (paths, lookingfor) ->
 
+	if typeof paths is "string" and not lookingfor
+		paths = path.dirname paths
+		lookingfor = path.basename paths
+
+	lookingfor = "#{lookingfor}.{xcson,cson,json}" unless path.extname lookingfor
+
+	# arrayify
+	paths = paths.split(path.sep) if typeof paths is 'string'
+
+	# Because /foo/bar becomes ['', 'foo', 'bar'] from the split above
+	paths[0] = path.sep unless paths[0]
+
+
 	new Promise (resolve, reject) ->
-
-		lookingfor = "#{lookingfor}.{xcson,cson,json}" unless path.extname lookingfor
-
-		# if lookingfor is in a subfolder, extract folder path
-		paths = path.dirname(lookingfor) unless paths
-
-		# arrayify
-		paths = paths.split(path.sep) if typeof paths is 'string'
-
-		# Because /foo/bar becomes ['', 'foo', 'bar'] from the split above
-		paths[0] = path.sep unless paths[0]
 
 		while paths.length
 
@@ -61,11 +64,13 @@ module.exports = Xcson = class Xcson
 				@config = {}
 			# Otherwise assume file.
 			else
-				@config =
-					file: config
-					dir: path.dirname config
+				@config = file: config
 		else
 			@config = config
+
+		if @config.file and not @config.cwd
+			@config.cwd = path.dirname(config) or rootfinder.path
+			@config.file = path.basename @config.file
 
 		@caches = {}
 
@@ -77,19 +82,18 @@ module.exports = Xcson = class Xcson
 		# @config.plugins ?= Object.keys extensions
 
 		if @config.file
-
-			files = glob.sync @config.file, { nonegate: true }
-
-			throw "No files found for \"#{@config.file}\"" unless files.length
-
-			if files.length > 1
-				promise = Promise.all(new Xcson(file) for file in files)
-			else
-				@file = files[0]
-				promise = @parse fs.readFileSync(files[0]).toString()
-
-		else
+			promise = findFile(@config.cwd, @config.file)
+				.then (files) =>
+					if files.length > 1
+						return Promise.all(new Xcson(file) for file in files)
+					else
+						# Current file in context, note this is not in @config
+						@file = files[0]
+						return @parse(fs.readFileSync(files[0]).toString())
+		else if parse_me
 			promise = @parse(parse_me)
+		else
+			promise = Promise.reject "Nothing to parse"
 
 		@exitblocker = new BlockNodeExit
 		@exitblocker.start()
@@ -195,16 +199,13 @@ module.exports = Xcson = class Xcson
 	toString: -> stringify @result, space: @config.stringifySpaces
 
 	import: (name, merge=false) ->
-
 		# if @cache name
 		# 	return Promise.resolve @cache name
-
-		new Promise (resolve, reject) =>
-			findFile(path.dirname(@config.file), name)
-			.then (files) ->
-				Promise.all((new Xcson(file) for file in files))
-				.then (res) -> resolve if merge then _.merge.apply(@, res) else res
-			, reject
+		findFile(path.join(@config.cwd, path.dirname(@config.file)), name)
+		.then (files) ->
+			Promise.all((new Xcson(file) for file in files))
+		.then (res) ->
+			if merge then _.merge.apply(@, res) else res
 
 	# cache: (name, json) ->
 	# 	@caches[name] = json if json
@@ -241,11 +242,9 @@ Xcson.scope.enumerate = (enumerators...) ->
 	importOrObjects = (for e in enumerators
 		if typeof e is "string" then @import.call(@, e) else e)
 
-	new Promise (resolve, reject) ->
-		Promise.all promisifyArray importOrObjects
-		.then (res) ->
-			resolve [].concat res...
-		, reject
+	Promise.all(promisifyArray importOrObjects)
+	.then (res) ->
+		[].concat res...
 
 Xcson.scope.inherits = (extenders...) ->
 	importOrObjects = (for e in extenders
