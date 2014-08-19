@@ -4,11 +4,11 @@ coffee = require 'coffee-script'
 fs = require 'fs'
 glob = require 'glob'
 path = require 'path'
-{Promise} = require 'es6-promise'
 stringify = require 'json-stable-stringify'
 traverseasync = require 'traverse-async'
 rootfinder = require 'root-finder'
 # contextify = require 'contextify'
+{Promise} = require 'es6-promise' unless Promise
 
 isPromise = (object) -> isObject(object) && typeof object.then is "function"
 isObject = (obj) -> '[object Object]' == Object::toString.call(obj)
@@ -110,14 +110,17 @@ module.exports = Xcson = class Xcson
 
 	parse: (parse_me, finalcallback) ->
 
-		throw "No cson object supplied" unless parse_me
+		return Promise.reject "No cson object supplied" unless parse_me
 
 		context = {}
 		for key, fn of @scope
 			context[key] = if typeof fn is 'function' then fn.bind(@) else fn
 
 		# https://github.com/bevry/cson/blob/master/README.md#use-case
-		result = coffee.eval parse_me, sandbox: context
+		try
+			result = coffee.eval parse_me, sandbox: context
+		catch e
+			return Promise.reject e
 
 		@traverse.call @, result
 
