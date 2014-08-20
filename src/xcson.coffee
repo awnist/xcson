@@ -173,6 +173,7 @@ module.exports = Xcson = class Xcson
 			traverseasync.traverse obj, (value, next) ->
 
 				@xcson = self
+				@root = obj
 
 				if isPromise @node
 
