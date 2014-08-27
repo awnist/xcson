@@ -89,6 +89,7 @@ module.exports = Xcson = class Xcson
 					else
 						# Current file in context, note this is not in @config
 						@file = files[0]
+						# console.log "Starting", @config.file
 						return @parse(fs.readFileSync(files[0]).toString())
 		else if parse_me
 			promise = @parse(parse_me)
@@ -99,14 +100,15 @@ module.exports = Xcson = class Xcson
 		@exitblocker.start()
 
 		promise.then (result) =>
+			# console.log "\tdone", @config.file
 			finalcallback(null, result) if finalcallback
 			@exitblocker.stop()
 		, (err) =>
+			# console.log "\tdone with errors"
 			finalcallback(err, null) if finalcallback
 			@exitblocker.stop()
 
 		return promise
-
 
 	parse: (parse_me, finalcallback) ->
 
@@ -193,7 +195,6 @@ module.exports = Xcson = class Xcson
 						return reject(err) if err
 						next()
 			, =>
-
 				doneWalking = true
 
 				if Object.keys(promises).length is 0
@@ -252,7 +253,7 @@ Xcson.scope.enumerate = (enumerators...) ->
 
 Xcson.scope.inherits = (extenders...) ->
 	importOrObjects = (for e in extenders
-		if typeof e is "string" then @import.call(@, e) else e)
+		if typeof e is "string" then @import.call(@, e, true) else e)
 
 	Promise.all(promisifyArray importOrObjects)
 	.then (res) => @traverse(_.merge.apply @, res)
