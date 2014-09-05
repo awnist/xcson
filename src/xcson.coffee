@@ -235,13 +235,13 @@ Xcson.walker 'multikey', (obj, next) ->
 		# console.log """Multikey "#{@key}" found, splitting and deleting"""
 
 		for key in @key.split(/,\s*/)
-			@parent[key] = _.cloneDeep @node
+			@parent[key] = @node
 
 		delete @parent[@key]
 
 	next()
 
-Xcson.scope.repeat = (times, content) -> _.cloneDeep(content) for n in [1..times]
+Xcson.scope.repeat = (times, content) -> content for n in [1..times]
 
 Xcson.scope.enumerate = (enumerators...) ->
 	importOrObjects = (for e in enumerators
