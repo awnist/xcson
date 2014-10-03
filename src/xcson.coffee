@@ -122,6 +122,10 @@ module.exports = Xcson = class Xcson
 		try
 			result = coffee.eval parse_me, sandbox: context
 		catch e
+			if @config.file and e.message
+				fullpath = path.join(@config.cwd, @config.file)
+				e.message = "Eval error in #{fullpath}: #{e.message}"
+				e.fileName = fullpath
 			return Promise.reject e
 
 		@traverse.call @, result
