@@ -28,7 +28,7 @@
     "lodash.merge": "^2.4.1",
     "package.root": "^0.2.0",
     "traverse-async": "0.x.x",
-    "when-traverse": "^2.1.3"
+    "when-traverse": "git://github.com/qoby/when-traverse.git"
   },
   "scripts": {
     "prepublish": "coffee -o lib/ -c src/",

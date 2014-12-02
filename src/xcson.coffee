@@ -1,12 +1,12 @@
 async = require 'async'
 coffee = require 'coffee-script'
+debug = require './debug'
 fs = require 'fs'
+packageRoot = require 'package.root'
 path = require 'path'
+{Promise} = require 'es6-promise' unless Promise
 stringify = require 'json-stable-stringify'
 whenTraverse = require 'when-traverse'
-packageRoot = require 'package.root'
-debug = require './debug'
-{Promise} = require 'es6-promise' unless Promise
 
 isPromise = (object) -> isObject(object) && typeof object.then is "function"
 isObject = (obj) -> '[object Object]' == Object::toString.call(obj)
@@ -100,7 +100,6 @@ module.exports = Xcson = class Xcson
     @traverse result, false
 
   traverse: (obj, newDebugName) ->
-    # console.log "TRAVERSING", obj
     traversedebug = if not newDebugName then @debug else (new debug(newDebugName)).log
     traversedebug "Traversing object."
 
@@ -154,7 +153,6 @@ module.exports = Xcson = class Xcson
 
   @walker: (name, fn) -> registerExtension name, 'walker', fn
   @scope: (name, fn) -> registerExtension name, 'scope', fn
-  # @function: (name, fn) -> registerExtension name, 'plugin', fn
 
 Xcson.walker 'multikey', require './extensions/walker.multikey'
 Xcson.scope 'repeat', require './extensions/scope.repeat'
