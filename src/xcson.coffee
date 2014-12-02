@@ -112,17 +112,12 @@ module.exports = Xcson = class Xcson
 
         seq = Promise.resolve(node)
 
-        for taskName, task of @walkers
-          context = 
-            task: taskName
-            key: key
-            path: path
-            parentNode: parentNode
-            originalNode: node
+        for task, taskfn of @walkers
+          context = { key, path, parentNode, task, originalNode: node }
 
           seq
           .then debugstep.bind context
-          .then task.bind context
+          .then taskfn.bind context
 
         # Transform undefined, which is ignored in whenTraverse, to REMOVE.
         # This means if any Promise returns undefined, the node will be deleted as (hopefully) expected.
