@@ -1,0 +1,13 @@
+{
+  # walker.multikey
+  "multikey, multikey2": { worked: true }
+
+  # scope.repeat
+  "repeat": repeat 2, { worked: true }
+
+  # scope.enumerate
+  "enumerate": enumerate "basic", "basic"
+
+  # scope.inherits
+  "inherits": inherits "basic", "subdirectory/basic", { objectWorked: true }
+}
