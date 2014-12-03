@@ -6,7 +6,7 @@ You write in an extensible CSON format, you get JSON back. It's the DRYest way t
 
 ## Example
 
-Let's say you need to create a huge ugly JSON schema:
+Let's say you need to create a huge, ugly JSON schema:
 
 **schema.json**
 
@@ -23,7 +23,6 @@ Let's say you need to create a huge ugly JSON schema:
             "middleName": {
                 "type": "string"
             }
-        ...
     }
 
 In the xcson world, you would create a mixin file:
@@ -89,13 +88,80 @@ becomes:
 
 Make sure to enclose in quotes.
 
+## Creating plugins
+
+There are two types of plugins: walkers and scope.
+
+Both are registered in a similar manner:
+
+    var xcson = require('xcson');
+    xcson.walker('Name of your plugin', function);
+    xcson.scope('Name of your plugin', function);
+
+** Walkers **
+
+Walkers run once on every node as xcson traverses object trees. They receive the current node as an argument, and need to return the node when completed:
+
+    xcson.walker('MyWalkerPlugin', function(node){
+      node.foo = "bar";
+      return node;
+    });
+
+Return values can also be Promises.
+
+     xcson.walker('MyWalkerPlugin', function(node){
+      new Promise(function(resolve, reject) {
+         somethingAsync(){
+            node.foo = "bar";
+            resolve(node);
+         }
+      });
+     });
+
+Walker functions are also bound with a context object that contains some handy properties:
+
+    xcson.walker('MyWalkerPlugin', function(node){
+      console.log(this);
+      // this.parentNode = Parent node
+      // this.key = Current key name
+      // this.path = Array of path keys to current location inside object.
+      // this.originalNode = The node as it began before being altered by any other walkers
+    });    
+
+Walkers are run in a series, with each walker receiving the results of the previous. The final result will replace the node content.
+
+See the multikey source for an example.
+
+** Scope **
+
+Scope plugins provide functions that are made available to each xcson file. These are like mixins.
+
+    xcson.scope('MyScopePlugin', function(text) { return text + " there" });
+
+Now in your xcson file, you can reference your plugin:
+
+    foo: MyScopePlugin "hello"
+
+With the final JSON output being:
+
+    { foo: "hello there" }
+
+See the source of inherits, repeat and enumerate for examples.
+
+## Debugging
+
+    Resolving huge Promise trees with secondary, inherited files can be messy business. For that reason, there is a console [debugger](https://github.com/visionmedia/debug) that runs internally and takes wildcards:
+    
+    $ DEBUG=xcson:* node yourscript.js
+    
+    $ DEBUG=xcson:*filename.xcson* node yourscript.js
+
+
 ## Notes
 
 xcson is valid CSON. CSON is just Coffeescript. xcson files are valid Coffeescript.
 
-
 output.toString() will, by default, sort all keynames.
-
 
 You can omit the leading and trailing document brackets for extra cleanliness:
 
