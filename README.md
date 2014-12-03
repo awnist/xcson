@@ -98,7 +98,7 @@ Both are registered in a similar manner:
     xcson.walker('Name of your plugin', function);
     xcson.scope('Name of your plugin', function);
 
-** Walkers **
+**Walkers**
 
 Walkers run once on every node as xcson traverses object trees. They receive the current node as an argument, and need to return the node when completed:
 
@@ -132,7 +132,7 @@ Walkers are run in a series, with each walker receiving the results of the previ
 
 See the multikey source for an example.
 
-** Scope **
+**Scope**
 
 Scope plugins provide functions that are made available to each xcson file. These are like mixins.
 
@@ -150,7 +150,7 @@ See the source of inherits, repeat and enumerate for examples.
 
 ## Debugging
 
-    Resolving huge Promise trees with secondary, inherited files can be messy business. For that reason, there is a console [debugger](https://github.com/visionmedia/debug) that runs internally and takes wildcards:
+Resolving huge Promise trees with secondary, inherited files can be messy business. For that reason, there is a console [debugger](https://github.com/visionmedia/debug) that runs internally and takes wildcards:
     
     $ DEBUG=xcson:* node yourscript.js
     
