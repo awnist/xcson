@@ -126,6 +126,7 @@ Walker functions are also bound with a context object that contains some handy p
       // this.key = Current key name
       // this.path = Array of path keys to current location inside object.
       // this.originalNode = The node as it began before being altered by any other walkers
+      // this.file = The current file being walked, if any
     });    
 
 Walkers are run in a series, with each walker receiving the results of the previous. The final result will replace the node content.
@@ -177,7 +178,7 @@ Infinitely nested plugins/mixins are valid:
     baz: "boo, woo": inherits "bar", thing: repeat 2, maybe: true
 
 but will become difficult to read as a side effect of Coffee's expressive nature.
-To help readability, you should use parenthesis, brackets and whitespace:
+To help readability, you should use parentheses, brackets and whitespace:
 
     baz:
         "boo, woo": inherits "bar",

@@ -3,7 +3,7 @@ coffee = require 'coffee-script'
 debug = require './debug'
 fs = require 'fs'
 packageRoot = require 'package.root'
-path = require 'path'
+pathutil = require 'path'
 {Promise} = require 'es6-promise' unless Promise
 stringify = require 'json-stable-stringify'
 whenTraverse = require 'when-traverse'
@@ -29,8 +29,8 @@ module.exports = Xcson = class Xcson
       @config = config
 
     if @config.file and not @config.cwd
-      @config.cwd = path.dirname(@config.file) or packageRoot.path
-      @config.file = path.basename @config.file
+      @config.cwd = pathutil.dirname(@config.file) or packageRoot.path
+      @config.file = pathutil.basename @config.file
 
     # By default, just use all available extensions.
     @config.extensions ?= Object.keys(extensions)
@@ -92,7 +92,7 @@ module.exports = Xcson = class Xcson
       result = coffee.eval parse_me, sandbox: context
     catch e
       if @config.file and e.message
-        fullpath = path.join(@config.cwd, @config.file)
+        fullpath = pathutil.join(@config.cwd, @config.file)
         e.message = "Eval error in #{fullpath}: #{e.message}"
         e.fileName = fullpath
       return Promise.reject e
@@ -105,25 +105,26 @@ module.exports = Xcson = class Xcson
 
     whenTraverse obj,
       enter: (node, key, parentNode, path) =>
+        
+        file = if @config.cwd then pathutil.join(@config.cwd, @config.file) else null
 
         debugstep = (node) ->
-          traversedebug "Running walker #{@task} on #{@key}"
+          traversedebug "Running walker #{@task} on #{@path.join('.')}"
           node
 
         seq = Promise.resolve(node)
 
         for task, taskfn of @walkers
-          context = { key, path, parentNode, task, originalNode: node }
+          context = { key, path, parentNode, task, originalNode: node, file: file }
 
-          seq
-          .then debugstep.bind context
-          .then taskfn.bind context
+          seq = seq
+                  .then debugstep.bind context
+                  .then taskfn.bind context
 
         # Transform undefined, which is ignored in whenTraverse, to REMOVE.
         # This means if any Promise returns undefined, the node will be deleted as (hopefully) expected.
-        seq.then (node) -> if node is undefined then whenTraverse.REMOVE else node
-
-        seq
+        seq.then (node) ->
+          if node is undefined then whenTraverse.REMOVE else node
 
   toObject: -> @result
   toString: -> stringify @result, space: @config.stringifySpaces
@@ -131,7 +132,7 @@ module.exports = Xcson = class Xcson
   import: (name) ->
     # if @cache name
     #   return Promise.resolve @cache name
-    findFiles(path.join(@config.cwd, path.dirname(@config.file)), name)
+    findFiles(pathutil.join(@config.cwd, pathutil.dirname(@config.file)), name)
     .then (files) =>
       Promise.all((new Xcson(file: file, breadcrumb: @config.breadcrumb) for file in files))
 
