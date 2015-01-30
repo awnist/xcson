@@ -20,7 +20,7 @@
   ],
   "dependencies": {
     "async": "~0.9.0",
-    "coffee-script": "~1.7.1",
+    "coffee-script": "1.9.x",
     "debug": "^2.1.0",
     "es6-promise": "~1.0.0",
     "glob": "~4.0.4",
