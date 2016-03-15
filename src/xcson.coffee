@@ -32,6 +32,9 @@ module.exports = Xcson = class Xcson
       @config.cwd = pathutil.dirname(@config.file) or packageRoot.path
       @config.file = pathutil.basename @config.file
 
+    @config.paths ?= []
+    @config.paths = [@config.paths] unless Array.isArray @config.paths
+
     # By default, just use all available extensions.
     @config.extensions ?= Object.keys(extensions)
 
@@ -54,7 +57,7 @@ module.exports = Xcson = class Xcson
       {name: @config.breadcrumb, log: @debug} = new debug @config.breadcrumb + @config.file
       @debug "Finding", @config.cwd, @config.file
 
-      promise = findFiles(@config.cwd, @config.file)
+      promise = findFiles(@config.paths.concat(@config.cwd), @config.file)
         .then (files) =>
           # If multiple files were found, parse all of them with new Xcson instances...
           if files.length > 1
@@ -132,7 +135,7 @@ module.exports = Xcson = class Xcson
   import: (name) ->
     # if @cache name
     #   return Promise.resolve @cache name
-    findFiles(pathutil.join(@config.cwd, pathutil.dirname(@config.file)), name)
+    findFiles(@config.paths.concat(pathutil.join(@config.cwd, pathutil.dirname(@config.file))), name)
     .then (files) =>
       Promise.all((new Xcson(file: file, breadcrumb: @config.breadcrumb) for file in files))
 
