@@ -1,0 +1,3 @@
+{
+  inheritCwd: inherits "./basic"
+}

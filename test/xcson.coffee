@@ -16,12 +16,27 @@ describe 'Xcson', ->
     promise = new xcson cwd: fileTestDir, file: 'basic'
     expect(promise).to.eventually.have.property 'worked'
 
+  it 'should search additional paths', ->
+    promise = new xcson
+                cwd: fileTestDir
+                paths: path.join(fileTestDir, 'subdirectory')
+                file: 'unique'
+    expect(promise).to.eventually.have.property 'unique'
+
+  it 'should prioritize cwd over additional search paths', ->
+    promise = new xcson
+                cwd: fileTestDir
+                paths: path.join(fileTestDir, 'subdirectory')
+                file: 'basic'
+    expect(promise).to.eventually.have.property 'worked'
+
   it 'should gracefully fail with invalid files', ->
     promise = new xcson cwd: fileTestDir, file: 'invalid'
     expect(promise).to.be.rejected
 
   describe 'default extensions', ->
     promise = new xcson cwd: fileTestDir, file: 'extensions'
+
     it 'should support multikey', ->
       expect(promise).to.eventually.have.deep.property 'multikey.worked'
       expect(promise).to.eventually.not.have.deep.property 'multikey, multikey2'
@@ -38,8 +53,11 @@ describe 'Xcson', ->
         expect(promise).to.eventually.have.deep.property 'inherits.subdirectoryWorked'
         expect(promise).to.eventually.have.deep.property 'inherits.objectWorked'
 
+      it 'should support relative paths', ->
+        expect(promise).to.eventually.have.deep.property 'inherits.inheritCwd.anotherSubdirectoryWorked'
+
       inherits = new xcson cwd: fileTestDir, file: 'subdirectory/anothersubdirectory/inheritRoot'
-      it 'should traverse upwards', ->
+      it 'should inherit from root', ->
         expect(inherits).to.eventually.have.deep.property 'worked.root'
 
   describe 'custom extensions', ->

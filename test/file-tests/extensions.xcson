@@ -9,5 +9,9 @@
   "enumerate": enumerate "basic", "basic"
 
   # scope.inherits
-  "inherits": inherits "basic", "subdirectory/basic", { objectWorked: true }
+  "inherits": inherits "basic",
+                        "subdirectory/basic",
+                        "subdirectory/anothersubdirectory/inheritCwd",
+                        { objectWorked: true }
+
 }
