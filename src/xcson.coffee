@@ -158,7 +158,7 @@ module.exports = Xcson = class Xcson
         seq = Promise.resolve(node)
 
         for task, taskfn of @walkers
-          context = { key, path, parentNode, task, originalNode: node, file: file }
+          context = { xcson: @, key, path, parentNode, task, originalNode: node, file: file }
 
           seq = seq
                   .then debugstep.bind context
