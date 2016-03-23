@@ -2,16 +2,13 @@
   "name": "xcson",
   "description": "Extensible CSON - build cson/json dynamically with mixins/plugins",
   "author": "Awnist <hi@awnist.com> (http://awnist.com)",
-  "version": "2.1.1",
+  "version": "2.2.1",
   "main": "./lib/xcson",
   "repository": {
     "type": "git",
     "url": "git@github.com:awnist/xcson.git"
   },
-  "license": {
-    "type": "Public Domain",
-    "url": "http://unlicense.org/"
-  },
+  "license": "BSD-3-Clause",
   "keywords": [
     "cson",
     "json",
@@ -19,14 +16,13 @@
     "schema"
   ],
   "dependencies": {
-    "async": "~0.9.0",
-    "coffee-script": "1.9.x",
-    "debug": "^2.1.0",
-    "es6-promise": "~1.0.0",
-    "glob": "~4.0.4",
-    "json-stable-stringify": "~1.0.0",
-    "lodash.merge": "^2.4.1",
-    "package.root": "^0.2.0",
+    "coffee-script": "1.10.x",
+    "debug": "^2.2.0",
+    "es6-promise": "~3.1.2",
+    "glob": "~7.0.3",
+    "json-stable-stringify": "~1.0.1",
+    "lodash.merge": "^4.3.2",
+    "package.root": "^1.0.1",
     "traverse-async": "0.x.x",
     "when-traverse": "git://github.com/qoby/when-traverse.git"
   },
@@ -35,7 +31,7 @@
     "test": "mocha"
   },
   "devDependencies": {
-    "chai": "^1.10.0",
+    "chai": "^3.5.0",
     "chai-as-promised": "*",
     "mocha": "*"
   }

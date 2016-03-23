@@ -1,4 +1,3 @@
-async = require 'async'
 coffee = require 'coffee-script'
 debug = require './debug'
 fs = require 'fs'
